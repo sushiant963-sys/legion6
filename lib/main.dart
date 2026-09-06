@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shamsi_date/shamsi_date.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
 void main() {
   runApp(const Legion6App());
@@ -15,28 +13,12 @@ class Legion6App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'لژیون ۶',
-
-      locale: const Locale('fa', 'IR'),
-
-      supportedLocales: const [
-        Locale('fa', 'IR'),
-      ],
-
-      localizationsDelegates: const [
-        PersianMaterialLocalizations.delegate,
-        PersianCupertinoLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.green,
         ),
         useMaterial3: true,
       ),
-
       home: const Directionality(
         textDirection: TextDirection.rtl,
         child: HomePage(),
@@ -56,7 +38,6 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xfff5f4ed),
         centerTitle: true,
-
         title: const Text(
           '🌹 لژیون ۶',
           style: TextStyle(
@@ -71,12 +52,15 @@ class HomePage extends StatelessWidget {
 
         child: Column(
           children: [
+
             const Card(
+              elevation: 3,
               child: Padding(
                 padding: EdgeInsets.all(20),
 
                 child: Column(
                   children: [
+
                     Icon(
                       Icons.campaign,
                       size: 45,
@@ -111,6 +95,7 @@ class HomePage extends StatelessWidget {
 
               child: Text(
                 'امکانات لژیون',
+
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -122,12 +107,17 @@ class HomePage extends StatelessWidget {
 
             GridView.count(
               crossAxisCount: 2,
+
               shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
+
+              physics:
+                  const NeverScrollableScrollPhysics(),
+
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
 
               children: [
+
                 MenuCard(
                   title: 'خواب من',
                   icon: Icons.nightlight_round,
@@ -137,11 +127,14 @@ class HomePage extends StatelessWidget {
                 MenuCard(
                   title: 'برنامه دارویی',
                   icon: Icons.medication,
+
                   onTap: () {
                     Navigator.push(
                       context,
+
                       MaterialPageRoute(
-                        builder: (_) => const MedicationPage(),
+                        builder: (_) =>
+                            const MedicationPage(),
                       ),
                     );
                   },
@@ -194,16 +187,18 @@ class MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
+      elevation: 2,
 
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
+
         onTap: onTap,
 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
 
           children: [
+
             Icon(
               icon,
               size: 48,
@@ -214,6 +209,7 @@ class MenuCard extends StatelessWidget {
 
             Text(
               title,
+
               textAlign: TextAlign.center,
 
               style: const TextStyle(
@@ -232,17 +228,18 @@ class MedicationPage extends StatefulWidget {
   const MedicationPage({super.key});
 
   @override
-  State<MedicationPage> createState() => _MedicationPageState();
+  State<MedicationPage> createState() =>
+      _MedicationPageState();
 }
 
-class _MedicationPageState extends State<MedicationPage> {
+class _MedicationPageState
+    extends State<MedicationPage> {
+
   DateTime selectedDate = DateTime.now();
 
   bool firstTaken = false;
   bool secondTaken = false;
   bool thirdTaken = false;
-
-  bool isLoading = true;
 
   final List<double> medicationHistory = [
     2,
@@ -262,82 +259,60 @@ class _MedicationPageState extends State<MedicationPage> {
     4,
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    loadMedicationStatus();
-  }
-
-  String dateKey(DateTime date) {
-    return '${date.year}-${date.month}-${date.day}';
-  }
-
-  Future<void> loadMedicationStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final key = dateKey(selectedDate);
-
-    if (!mounted) return;
-
-    setState(() {
-      firstTaken = prefs.getBool('${key}_first') ?? false;
-
-      secondTaken = prefs.getBool('${key}_second') ?? false;
-
-      thirdTaken = prefs.getBool('${key}_third') ?? false;
-
-      isLoading = false;
-    });
-  }
-
-  Future<void> saveMedicationStatus() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final key = dateKey(selectedDate);
-
-    await prefs.setBool(
-      '${key}_first',
-      firstTaken,
-    );
-
-    await prefs.setBool(
-      '${key}_second',
-      secondTaken,
-    );
-
-    await prefs.setBool(
-      '${key}_third',
-      thirdTaken,
-    );
-  }
-
-  String toPersianNumber(String number) {
+  String toPersianNumber(String input) {
     const english = [
-      '0', '1', '2', '3', '4',
-      '5', '6', '7', '8', '9',
+      '0',
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9'
     ];
 
     const persian = [
-      '۰', '۱', '۲', '۳', '۴',
-      '۵', '۶', '۷', '۸', '۹',
+      '۰',
+      '۱',
+      '۲',
+      '۳',
+      '۴',
+      '۵',
+      '۶',
+      '۷',
+      '۸',
+      '۹'
     ];
 
-    String result = number;
+    String result = input;
 
     for (int i = 0; i < english.length; i++) {
-      result = result.replaceAll(
-        english[i],
-        persian[i],
-      );
+      result =
+          result.replaceAll(english[i], persian[i]);
     }
 
     return result;
   }
 
   String getPersianDate(DateTime date) {
-    final jalali = Jalali.fromDateTime(date);
+
+    final jalali =
+        Jalali.fromDateTime(date);
+
+    const weekdays = [
+      'شنبه',
+      'یکشنبه',
+      'دوشنبه',
+      'سه‌شنبه',
+      'چهارشنبه',
+      'پنجشنبه',
+      'جمعه',
+    ];
 
     const months = [
+      '',
       'فروردین',
       'اردیبهشت',
       'خرداد',
@@ -352,98 +327,40 @@ class _MedicationPageState extends State<MedicationPage> {
       'اسفند',
     ];
 
-    const weekdays = [
-      'شنبه',
-      'یکشنبه',
-      'دوشنبه',
-      'سه‌شنبه',
-      'چهارشنبه',
-      'پنجشنبه',
-      'جمعه',
-    ];
+    final weekday =
+        weekdays[date.weekday % 7];
 
-    final weekdayName =
-        weekdays[jalali.weekDay - 1];
+    final result =
+        '$weekday - ${jalali.day} ${months[jalali.month]} ${jalali.year}';
 
-    return '$weekdayName '
-        '${toPersianNumber(jalali.day.toString())} '
-        '${months[jalali.month - 1]} '
-        '${toPersianNumber(jalali.year.toString())}';
+    return toPersianNumber(result);
   }
 
   int get completedCount {
+
     int count = 0;
 
     if (firstTaken) count++;
+
     if (secondTaken) count++;
+
     if (thirdTaken) count++;
 
     return count;
   }
 
-  Future<void> changeDay(int days) async {
+  void changeDay(int days) {
+
     setState(() {
-      selectedDate = selectedDate.add(
-        Duration(days: days),
-      );
+      selectedDate =
+          selectedDate.add(Duration(days: days));
 
-      isLoading = true;
+      // فعلاً با تغییر روز،
+      // وضعیت تیک‌ها جدا می‌شود
+      firstTaken = false;
+      secondTaken = false;
+      thirdTaken = false;
     });
-
-    await loadMedicationStatus();
-  }
-
-  Future<void> selectDate() async {
-    final currentJalali =
-        Jalali.fromDateTime(selectedDate);
-
-    final Jalali? picked =
-        await showPersianDatePicker(
-      context: context,
-
-      initialDate: currentJalali,
-
-      firstDate: Jalali(1380, 1, 1),
-
-      lastDate: Jalali(1450, 12, 29),
-
-      initialEntryMode:
-          PersianDatePickerEntryMode.calendarOnly,
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked.toDateTime();
-
-        isLoading = true;
-      });
-
-      await loadMedicationStatus();
-    }
-  }
-
-  Future<void> updateFirst(bool value) async {
-    setState(() {
-      firstTaken = value;
-    });
-
-    await saveMedicationStatus();
-  }
-
-  Future<void> updateSecond(bool value) async {
-    setState(() {
-      secondTaken = value;
-    });
-
-    await saveMedicationStatus();
-  }
-
-  Future<void> updateThird(bool value) async {
-    setState(() {
-      thirdTaken = value;
-    });
-
-    await saveMedicationStatus();
   }
 
   Widget medicationCard({
@@ -454,15 +371,16 @@ class _MedicationPageState extends State<MedicationPage> {
     required ValueChanged<bool?> onChanged,
     required IconData icon,
   }) {
+
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
-      elevation: 2,
 
       child: Padding(
         padding: const EdgeInsets.all(16),
 
         child: Row(
           children: [
+
             Icon(
               icon,
               color: Colors.green,
@@ -477,8 +395,10 @@ class _MedicationPageState extends State<MedicationPage> {
                     CrossAxisAlignment.start,
 
                 children: [
+
                   Text(
                     title,
+
                     style: const TextStyle(
                       fontSize: 19,
                       fontWeight: FontWeight.bold,
@@ -496,7 +416,9 @@ class _MedicationPageState extends State<MedicationPage> {
 
             Checkbox(
               value: taken,
+
               activeColor: Colors.green,
+
               onChanged: onChanged,
             ),
           ],
@@ -506,6 +428,7 @@ class _MedicationPageState extends State<MedicationPage> {
   }
 
   Widget buildChart() {
+
     const maxValue = 10.0;
 
     return Card(
@@ -516,8 +439,10 @@ class _MedicationPageState extends State<MedicationPage> {
 
         child: Column(
           children: [
+
             const Text(
               '📈 روند مقدار دارو',
+
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -542,7 +467,9 @@ class _MedicationPageState extends State<MedicationPage> {
 
                 children: List.generate(
                   medicationHistory.length,
+
                   (index) {
+
                     final height =
                         (medicationHistory[index] /
                                 maxValue) *
@@ -560,11 +487,13 @@ class _MedicationPageState extends State<MedicationPage> {
                               MainAxisAlignment.end,
 
                           children: [
+
                             Text(
                               toPersianNumber(
                                 medicationHistory[index]
                                     .toStringAsFixed(0),
                               ),
+
                               style: const TextStyle(
                                 fontSize: 10,
                               ),
@@ -577,6 +506,7 @@ class _MedicationPageState extends State<MedicationPage> {
 
                               decoration: BoxDecoration(
                                 color: Colors.green,
+
                                 borderRadius:
                                     BorderRadius.circular(5),
                               ),
@@ -597,8 +527,11 @@ class _MedicationPageState extends State<MedicationPage> {
                   MainAxisAlignment.spaceBetween,
 
               children: [
+
                 Text('شروع سفر'),
+
                 Text('اوج مصرف'),
+
                 Text('کاهش تدریجی'),
               ],
             ),
@@ -610,196 +543,238 @@ class _MedicationPageState extends State<MedicationPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
 
-    return Scaffold(
-      backgroundColor: const Color(0xfff5f4ed),
+    return Directionality(
+      textDirection: TextDirection.rtl,
 
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
-        centerTitle: true,
+      child: Scaffold(
+        backgroundColor:
+            const Color(0xfff5f4ed),
 
-        title: const Text(
-          '💊 برنامه دارویی',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: Colors.green,
+
+          foregroundColor: Colors.white,
+
+          centerTitle: true,
+
+          title: const Text(
+            '💊 برنامه دارویی',
+
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
 
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
 
-        child: Column(
-          children: [
-            Card(
-              elevation: 2,
+          child: Column(
+            children: [
 
-              child: Padding(
-                padding: const EdgeInsets.all(15),
+              Card(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(15),
 
-                child: Column(
-                  children: [
-                    const Text(
-                      '📅 انتخاب تاریخ',
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  child: Column(
+                    children: [
 
-                    const SizedBox(height: 12),
+                      const Text(
+                        '📅 انتخاب تاریخ',
 
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_forward,
-                          ),
-
-                          onPressed: () =>
-                              changeDay(-1),
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
+                      ),
 
-                        Expanded(
-                          child: Text(
-                            getPersianDate(
-                              selectedDate,
+                      const SizedBox(height: 12),
+
+                      Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment
+                                .spaceBetween,
+
+                        children: [
+
+                          IconButton(
+                            icon: const Icon(
+                              Icons.arrow_forward,
                             ),
 
-                            textAlign:
-                                TextAlign.center,
+                            onPressed: () =>
+                                changeDay(-1),
+                          ),
 
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight:
-                                  FontWeight.bold,
+                          Expanded(
+                            child: Text(
+                              getPersianDate(
+                                selectedDate,
+                              ),
+
+                              textAlign:
+                                  TextAlign.center,
+
+                              style:
+                                  const TextStyle(
+                                fontSize: 17,
+                                fontWeight:
+                                    FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
 
-                        IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back,
+                          IconButton(
+                            icon: const Icon(
+                              Icons.arrow_back,
+                            ),
+
+                            onPressed: () =>
+                                changeDay(1),
                           ),
+                        ],
+                      ),
 
-                          onPressed: () =>
-                              changeDay(1),
+                      const SizedBox(height: 8),
+
+                      Text(
+                        'تاریخ انتخاب‌شده به تقویم شمسی نمایش داده می‌شود',
+
+                        textAlign:
+                            TextAlign.center,
+
+                        style: TextStyle(
+                          color:
+                              Colors.grey.shade600,
+                          fontSize: 12,
                         ),
-                      ],
-                    ),
-
-                    TextButton.icon(
-                      onPressed: selectDate,
-
-                      icon: const Icon(
-                        Icons.calendar_month,
                       ),
-
-                      label: const Text(
-                        'انتخاب تاریخ شمسی',
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 15),
+              const SizedBox(height: 15),
 
-            buildChart(),
+              buildChart(),
 
-            const SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-            Card(
-              color: Colors.green.shade50,
+              Card(
+                color: Colors.green.shade50,
 
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.all(16),
 
-                child: Column(
-                  children: [
-                    const Text(
-                      'وضعیت مصرف در تاریخ انتخاب‌شده',
+                  child: Column(
+                    children: [
 
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight:
-                            FontWeight.bold,
+                      const Text(
+                        'وضعیت مصرف در تاریخ انتخاب‌شده',
+
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight:
+                              FontWeight.bold,
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                    Text(
-                      '${toPersianNumber(completedCount.toString())} از ۳ نوبت ثبت شده',
+                      Text(
+                        '$completedCount از ۳ نوبت ثبت شده',
 
-                      style: const TextStyle(
-                        fontSize: 18,
-                        color: Colors.green,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.green,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 18),
+              const SizedBox(height: 18),
 
-            medicationCard(
-              title: 'نوبت اول',
-              time: '۸:۰۰ صبح',
-              amount: 'طبق دستور راهنما',
-              taken: firstTaken,
-              icon: Icons.wb_sunny_outlined,
+              medicationCard(
+                title: 'نوبت اول',
 
-              onChanged: (value) =>
-                  updateFirst(value ?? false),
-            ),
+                time: '۸:۰۰ صبح',
 
-            medicationCard(
-              title: 'نوبت دوم',
-              time: '۱۴:۰۰',
-              amount: 'طبق دستور راهنما',
-              taken: secondTaken,
-              icon: Icons.light_mode_outlined,
+                amount: 'طبق دستور راهنما',
 
-              onChanged: (value) =>
-                  updateSecond(value ?? false),
-            ),
+                taken: firstTaken,
 
-            medicationCard(
-              title: 'نوبت سوم',
-              time: '۲۲:۰۰',
-              amount: 'طبق دستور راهنما',
-              taken: thirdTaken,
-              icon: Icons.nightlight_round,
+                icon: Icons.wb_sunny_outlined,
 
-              onChanged: (value) =>
-                  updateThird(value ?? false),
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text(
-              '🔔 قابلیت یادآوری مصرف دارو در مرحله بعد اضافه می‌شود.',
-
-              textAlign: TextAlign.center,
-
-              style: TextStyle(
-                color: Colors.black54,
+                onChanged: (value) {
+                  setState(() {
+                    firstTaken =
+                        value ?? false;
+                  });
+                },
               ),
-            ),
 
-            const SizedBox(height: 30),
-          ],
+              medicationCard(
+                title: 'نوبت دوم',
+
+                time: '۱۴:۰۰',
+
+                amount: 'طبق دستور راهنما',
+
+                taken: secondTaken,
+
+                icon:
+                    Icons.light_mode_outlined,
+
+                onChanged: (value) {
+                  setState(() {
+                    secondTaken =
+                        value ?? false;
+                  });
+                },
+              ),
+
+              medicationCard(
+                title: 'نوبت سوم',
+
+                time: '۲۲:۰۰',
+
+                amount: 'طبق دستور راهنما',
+
+                taken: thirdTaken,
+
+                icon:
+                    Icons.nightlight_round,
+
+                onChanged: (value) {
+                  setState(() {
+                    thirdTaken =
+                        value ?? false;
+                  });
+                },
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                '🔔 یادآوری مصرف دارو در مرحله بعد فعال می‌شود.',
+
+                textAlign:
+                    TextAlign.center,
+
+                style: TextStyle(
+                  color: Colors.black54,
+                ),
+              ),
+
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );
