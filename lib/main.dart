@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const Legion6App());
@@ -53,7 +54,11 @@ class HomePage extends StatelessWidget {
                 padding: EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Icon(Icons.campaign, size: 45),
+                    Icon(
+                      Icons.campaign,
+                      size: 45,
+                      color: Colors.green,
+                    ),
                     SizedBox(height: 10),
                     Text(
                       'دستور جلسه بعدی',
@@ -63,7 +68,10 @@ class HomePage extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 8),
-                    Text('دستور جلسه این هفته به‌زودی اعلام می‌شود'),
+                    Text(
+                      'دستور جلسه این هفته به‌زودی اعلام می‌شود',
+                      textAlign: TextAlign.center,
+                    ),
                   ],
                 ),
               ),
@@ -90,6 +98,7 @@ class HomePage extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
+              childAspectRatio: 1,
               children: [
                 MenuCard(
                   title: 'خواب من',
@@ -152,13 +161,18 @@ class MenuCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      elevation: 3,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 48, color: Colors.green),
+            Icon(
+              icon,
+              size: 48,
+              color: Colors.green,
+            ),
             const SizedBox(height: 12),
             Text(
               title,
@@ -189,6 +203,8 @@ class _MedicationPageState extends State<MedicationPage> {
   bool secondTaken = false;
   bool thirdTaken = false;
 
+  bool isLoading = true;
+
   final List<double> medicationHistory = [
     2,
     3,
@@ -207,23 +223,40 @@ class _MedicationPageState extends State<MedicationPage> {
     4,
   ];
 
-  final List<String> historyDates = [
-    'ماه ۱',
-    'ماه ۲',
-    'ماه ۳',
-    'ماه ۴',
-    'ماه ۵',
-    'ماه ۶',
-    'ماه ۷',
-    'ماه ۸',
-    'ماه ۹',
-    'ماه ۱۰',
-    'ماه ۱۱',
-    'ماه ۱۲',
-    'ماه ۱۳',
-    'ماه ۱۴',
-    'ماه ۱۵',
-  ];
+  @override
+  void initState() {
+    super.initState();
+    loadMedicationStatus();
+  }
+
+  String dateKey(DateTime date) {
+    return '${date.year}-${date.month}-${date.day}';
+  }
+
+  Future<void> loadMedicationStatus() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final key = dateKey(selectedDate);
+
+    setState(() {
+      firstTaken = prefs.getBool('${key}_first') ?? false;
+      secondTaken = prefs.getBool('${key}_second') ?? false;
+      thirdTaken = prefs.getBool('${key}_third') ?? false;
+      isLoading = false;
+    });
+  }
+
+  Future<void> saveMedicationStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = dateKey(selectedDate);
+
+    await prefs.setBool('${key}_first', firstTaken);
+    await prefs.setBool('${key}_second', secondTaken);
+    await prefs.setBool('${key}_third', thirdTaken);
+  }
 
   String getPersianDate(DateTime date) {
     final weekdays = [
@@ -250,10 +283,57 @@ class _MedicationPageState extends State<MedicationPage> {
     return count;
   }
 
-  void changeDay(int days) {
+  Future<void> changeDay(int days) async {
     setState(() {
       selectedDate = selectedDate.add(Duration(days: days));
     });
+
+    await loadMedicationStatus();
+  }
+
+  Future<void> selectDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 2000),
+      ),
+      lastDate: DateTime.now().add(
+        const Duration(days: 365),
+      ),
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedDate = picked;
+      });
+
+      await loadMedicationStatus();
+    }
+  }
+
+  Future<void> updateFirst(bool value) async {
+    setState(() {
+      firstTaken = value;
+    });
+
+    await saveMedicationStatus();
+  }
+
+  Future<void> updateSecond(bool value) async {
+    setState(() {
+      secondTaken = value;
+    });
+
+    await saveMedicationStatus();
+  }
+
+  Future<void> updateThird(bool value) async {
+    setState(() {
+      thirdTaken = value;
+    });
+
+    await saveMedicationStatus();
   }
 
   Widget medicationCard({
@@ -266,12 +346,18 @@ class _MedicationPageState extends State<MedicationPage> {
   }) {
     return Card(
       margin: const EdgeInsets.only(bottom: 14),
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: Colors.green, size: 38),
+            Icon(
+              icon,
+              color: Colors.green,
+              size: 38,
+            ),
             const SizedBox(width: 12),
+
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -289,6 +375,7 @@ class _MedicationPageState extends State<MedicationPage> {
                 ],
               ),
             ),
+
             Checkbox(
               value: taken,
               activeColor: Colors.green,
@@ -301,10 +388,10 @@ class _MedicationPageState extends State<MedicationPage> {
   }
 
   Widget buildChart() {
-    const chartHeight = 180.0;
     const maxValue = 10.0;
 
     return Card(
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -327,7 +414,7 @@ class _MedicationPageState extends State<MedicationPage> {
             const SizedBox(height: 20),
 
             SizedBox(
-              height: chartHeight,
+              height: 180,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: List.generate(
@@ -338,8 +425,7 @@ class _MedicationPageState extends State<MedicationPage> {
 
                     return Expanded(
                       child: Padding(
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -353,8 +439,7 @@ class _MedicationPageState extends State<MedicationPage> {
                               height: height,
                               decoration: BoxDecoration(
                                 color: Colors.green,
-                                borderRadius:
-                                    BorderRadius.circular(5),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                             ),
                           ],
@@ -384,6 +469,14 @@ class _MedicationPageState extends State<MedicationPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xfff5f4ed),
       appBar: AppBar(
@@ -392,14 +485,19 @@ class _MedicationPageState extends State<MedicationPage> {
         centerTitle: true,
         title: const Text(
           '💊 برنامه دارویی',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
+
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
+
         child: Column(
           children: [
             Card(
+              elevation: 2,
               child: Padding(
                 padding: const EdgeInsets.all(15),
                 child: Column(
@@ -415,12 +513,12 @@ class _MedicationPageState extends State<MedicationPage> {
                     const SizedBox(height: 12),
 
                     Row(
-                      mainAxisAlignment:
-                          MainAxisAlignment.spaceBetween,
                       children: [
                         IconButton(
                           icon: const Icon(Icons.arrow_forward),
-                          onPressed: () => changeDay(-1),
+                          onPressed: () {
+                            changeDay(-1);
+                          },
                         ),
 
                         Expanded(
@@ -436,32 +534,15 @@ class _MedicationPageState extends State<MedicationPage> {
 
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
-                          onPressed: () => changeDay(1),
+                          onPressed: () {
+                            changeDay(1);
+                          },
                         ),
                       ],
                     ),
 
                     TextButton.icon(
-                      onPressed: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate,
-                          firstDate:
-                              DateTime.now().subtract(
-                            const Duration(days: 1000),
-                          ),
-                          lastDate:
-                              DateTime.now().add(
-                            const Duration(days: 365),
-                          ),
-                        );
-
-                        if (picked != null) {
-                          setState(() {
-                            selectedDate = picked;
-                          });
-                        }
-                      },
+                      onPressed: selectDate,
                       icon: const Icon(Icons.calendar_month),
                       label: const Text('انتخاب تاریخ دلخواه'),
                     ),
@@ -489,7 +570,9 @@ class _MedicationPageState extends State<MedicationPage> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+
                     const SizedBox(height: 8),
+
                     Text(
                       '$completedCount از ۳ نوبت ثبت شده',
                       style: const TextStyle(
@@ -511,9 +594,7 @@ class _MedicationPageState extends State<MedicationPage> {
               taken: firstTaken,
               icon: Icons.wb_sunny_outlined,
               onChanged: (value) {
-                setState(() {
-                  firstTaken = value ?? false;
-                });
+                updateFirst(value ?? false);
               },
             ),
 
@@ -524,9 +605,7 @@ class _MedicationPageState extends State<MedicationPage> {
               taken: secondTaken,
               icon: Icons.light_mode_outlined,
               onChanged: (value) {
-                setState(() {
-                  secondTaken = value ?? false;
-                });
+                updateSecond(value ?? false);
               },
             ),
 
@@ -537,18 +616,18 @@ class _MedicationPageState extends State<MedicationPage> {
               taken: thirdTaken,
               icon: Icons.nightlight_round,
               onChanged: (value) {
-                setState(() {
-                  thirdTaken = value ?? false;
-                });
+                updateThird(value ?? false);
               },
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
             const Text(
-              '🔔 یادآوری مصرف دارو در مرحله بعد فعال می‌شود.',
+              '🔔 قابلیت یادآوری و نوتیفیکیشن در مرحله بعد اضافه می‌شود.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black54),
+              style: TextStyle(
+                color: Colors.black54,
+              ),
             ),
 
             const SizedBox(height: 30),
